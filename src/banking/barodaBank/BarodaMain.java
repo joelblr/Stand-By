@@ -2,11 +2,10 @@ package banking.barodaBank;
 
 import errors.*;
 import design.*;
-import banking.*;
 import java.util.*;
 
 
-public class BarodaMain extends BankMain {
+public class BarodaMain {
 
 	static BarodaBank currentBarodaAcc;
 	static HashMap<String, BarodaBank> barodaAccounts;

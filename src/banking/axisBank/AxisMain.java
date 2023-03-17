@@ -2,11 +2,10 @@ package banking.axisBank;
 
 import errors.*;
 import design.*;
-import banking.*;
 import java.util.*;
 
 
-public class AxisMain extends BankMain {
+public class AxisMain {
 
 	static AxisBank currentAxisAcc;
 	static HashMap<String, AxisBank> axisAccounts;
