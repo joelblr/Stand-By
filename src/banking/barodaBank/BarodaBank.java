@@ -9,16 +9,16 @@ import java.util.*;
 public class BarodaBank implements Bank<BarodaBank> {
 
 	static double rate = 7.5;
-	/*
-	 Credential1, Credential2, Credential3,...
-	 u can add ur own, but make sure to differ it from one bank to another 
-	 */
+
+	/** @info Account Credentials */
 	String name, phno, password;
 	double amount;
+
 
 	BarodaBank() {
 		amount = 0.0;
 	}
+
 
 	public void amtUpdate(double amt) {
 		this.amount += amt;
@@ -35,25 +35,26 @@ public class BarodaBank implements Bank<BarodaBank> {
 
 	}public double getBalance() {
 		return this.amount;
-	}
 
-	public void setName(String name) {
+
+	}public void setName(String name) {
+
+		if (name.matches("[a-zA-Z]+") == false)
+			throw new BadAccountException("<BAD NAME!>\nAlphabets only.");
 		this.name = name;
 
 	}public void setPhNo(String phno) {
-		try {
-			Integer.parseInt(phno);
-		}catch (NumberFormatException e) {
-			throw new BadPhoneNumberException("<BAD PHONE NUMBER!>\nValid 10 Digit Number Plz.");
-		}
-		if (phno.length() != 10)
-			throw new BadPhoneNumberException("<BAD PHONE NUMBER!>\n10 Digit Number Plz.");
+
+		if (phno.matches("[0-9]+") == false || phno.trim().length() != 10)
+			throw new BadAccountException("<BAD PHONE NUMBER!>\nValid 10 Digit Number Plz.");
 		this.phno = phno;
 
-	}public void setPassword(String password) {
-		if (password.length() < 8)
-			throw new BadPasswordException("<BAD PASSWORD!>\nLength >= 8");
-		this.password = password;
+	}public void setPassword(String password1, String password2) {
+		if (password1.length() < 8)
+			throw new BadAccountException("<BAD PASSWORD!>\nLength >= 8");
+		if (password1.equals(password2) == false)
+			throw new BadAccountException("<BAD PASSWORD!>\nPasswords don't Match.");
+		this.password = password1;
 	}
 
 
@@ -73,13 +74,14 @@ public class BarodaBank implements Bank<BarodaBank> {
 				new DLabel("", "<joint>", ""),
 				new DLabel("Enter your name:  ", "<input>", "C"),
 				new DLabel("Enter your phone no.:  ", "<input>", "C"),
-				new DLabel("Enter your password:  ", "<input>", "C"),
+				new DLabel("Enter your password:  ", "<hide>", "C"),
+				new DLabel("Confirm the password:  ", "<hide>", "C"),
 				new DLabel("", "<base>", "")
 			);
 		BarodaBank acc = new BarodaBank();
 		acc.setName(stdin.get(0).trim());
 		acc.setPhNo(stdin.get(1).trim());
-		acc.setPassword(stdin.get(2).trim());
+		acc.setPassword(stdin.get(2).trim(), stdin.get(3).trim());
 
 		accList.put(acc.getName(), acc);
 
@@ -104,18 +106,18 @@ public class BarodaBank implements Bank<BarodaBank> {
 				new DLabel("Axis Bank: Sign In", "<tag>", "Y"),
 				new DLabel("", "<joint>", ""),
 				new DLabel("Enter your name:  ", "<input>", "C"),
-				new DLabel("Enter your password:  ", "<input>", "C"),
+				new DLabel("Enter your password:  ", "<hide>", "C"),
 				new DLabel("", "<base>", "")
 			);
 		String name = stdin.get(0).trim();
 		String pass = stdin.get(1).trim();
 
 		if (!accList.containsKey(name))
-			throw new BadAccountException(String.format("<INVALID ACCESS!>Account: %s NOT Found.", name));
+			throw new BadAccountException(String.format("<INVALID ACCESS!>\nAccount: %s NOT Found.", name));
 
 		BarodaBank acc = accList.get(name);
 		if (!acc.getPassword().equals(pass))
-			throw new BadPasswordException(String.format("<BAD PASSWORD!>\nPassword %s Incorrect.", pass));
+			throw new BadAccountException(String.format("<BAD PASSWORD!>\nPassword %s Incorrect.", pass));
 
 		Design.printBox(0,
 			new DLabel("", "<top>", ""),
@@ -145,7 +147,7 @@ public class BarodaBank implements Bank<BarodaBank> {
 					new DLabel("Axis Bank: Delete Account", "<tag>", "Y"),
 					new DLabel("", "<joint>", ""),
 					new DLabel("Enter your name:  ", "<input>", "C"),
-					new DLabel("Enter your password:  ", "<input>", "C"),
+					new DLabel("Enter your password:  ", "<hide>", "C"),
 					new DLabel("", "<base>", "")
 				);
 
@@ -153,11 +155,13 @@ public class BarodaBank implements Bank<BarodaBank> {
 		String pass = stdin.get(1).trim();
 
 		if (!accList.containsKey(name))
-			throw new BadAccountException(String.format("<INVALID ACCESS!>\nAccount: %s NOT Found.", name));
+			throw new BadAccountException(
+				String.format("<INVALID ACCESS!>\nAccount: %s NOT Found.", name));
 
 		BarodaBank acc = accList.get(name);
 		if (!acc.getPassword().equals(pass))
-			throw new BadPasswordException(String.format("<BAD PASSWORD!>\nPassword %s Incorrect.", pass));
+			throw new BadAccountException(
+				String.format("<BAD PASSWORD!>\nPassword %s Incorrect.", pass));
 
 		accList.remove(name);
 
@@ -241,7 +245,8 @@ public class BarodaBank implements Bank<BarodaBank> {
 
 		double DAmt = Double.parseDouble(stdin.get(0).trim());
 		if (DAmt > 1e6 || DAmt <= 0)
-			throw new BadTransactionException(String.format("<TRANSACTION OVERFLOW!>\nCan't Deposit Rs %.2f.", DAmt));
+			throw new BadTransactionException(
+				String.format("<TRANSACTION OVERFLOW!>\nCan't Deposit Rs %.2f.", DAmt));
 
 		this.amtUpdate(DAmt);
 
@@ -273,7 +278,8 @@ public class BarodaBank implements Bank<BarodaBank> {
 
 		double WAmt = Double.parseDouble(stdin.get(0).trim());
 		if (WAmt > 1e6 || WAmt <= 0 || WAmt > this.getBalance())
-			throw new BadTransactionException(String.format("<TRANSACTION OVERFLOW!>\nCan't Withdraw Rs %.2f.", WAmt));
+			throw new BadTransactionException(
+				String.format("<TRANSACTION OVERFLOW!>\nCan't Withdraw Rs %.2f.", WAmt));
 
 		this.amtUpdate(-WAmt);
 
@@ -287,7 +293,6 @@ public class BarodaBank implements Bank<BarodaBank> {
 		);
 
 	}
-
 
 }
 
